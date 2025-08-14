@@ -43,17 +43,20 @@ let gameOver = false;
 const timerDisplay = document.getElementById("timer");
 const scoreDisplay = document.getElementById("score");
 
-// Countdown once per second
+// Countdown timer: subtract 1 second every 1000ms
 let countdownInterval = setInterval(() => {
-  timeLeft--;
-  let minutes = Math.floor(timeLeft / 60);
-  let seconds = timeLeft % 60;
-  timerDisplay.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-  if (timeLeft <= 0) {
-    gameOver = true;
-    clearInterval(countdownInterval);
+  if (!gameOver) {
+    timeLeft--;
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+    timerDisplay.textContent = `Time: ${minutes}:${seconds.toString().padStart(2,'0')}`;
+
+    if (timeLeft <= 0) {
+      gameOver = true;
+      clearInterval(countdownInterval);
+    }
   }
-}, 1000);
+}, 1000); // 1000ms = 1 second
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") basket.x -= 20;
@@ -71,7 +74,7 @@ function spawnItem() {
   });
 }
 
-// Start spawning items every 800ms
+// Spawn items every 800ms
 let itemSpawnInterval = setInterval(() => {
   if (!gameOver) spawnItem();
 }, 800);
@@ -80,11 +83,9 @@ function update() {
   if (gameOver) return;
 
   // Move items
-  items.forEach(item => {
-    item.y += item.speed;
-  });
+  items.forEach(item => item.y += item.speed);
 
-  // Check for catch
+  // Catch detection
   for (let i = items.length - 1; i >= 0; i--) {
     let item = items[i];
     if (
@@ -94,33 +95,33 @@ function update() {
     ) {
       score++;
       scoreDisplay.textContent = "Score: " + score;
-      items.splice(i, 1);
+      items.splice(i,1);
     } else if (item.y > canvas.height) {
-      items.splice(i, 1);
+      items.splice(i,1);
     }
   }
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
   // Draw basket
   ctx.fillStyle = "brown";
   ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
 
-  // Draw items
+  // Draw falling items
   ctx.fillStyle = "red";
   items.forEach(item => {
     ctx.beginPath();
-    ctx.arc(item.x + item.size/2, item.y + item.size/2, item.size/2, 0, Math.PI * 2);
+    ctx.arc(item.x + item.size/2, item.y + item.size/2, item.size/2, 0, Math.PI*2);
     ctx.fill();
   });
 
   if (gameOver) {
     ctx.fillStyle = "black";
     ctx.font = "24px sans-serif";
-    ctx.fillText("Game Over! Final Score: " + score, 40, canvas.height/2);
-    clearInterval(itemSpawnInterval); // stop new items
+    ctx.fillText("Game Over! Final Score: " + score, 30, canvas.height/2);
+    clearInterval(itemSpawnInterval); // stop spawning
   }
 }
 
