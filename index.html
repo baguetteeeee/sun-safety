@@ -22,19 +22,24 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// Basket
 let basket = { x: canvas.width/2 - 30, y: canvas.height - 30, width: 60, height: 20 };
+
+// Game variables
 let items = [];
 let score = 0;
 let timeLeft = 60; // 1 minute
 let gameOver = false;
 
+// DOM elements
 const timerDisplay = document.getElementById("timer");
 const scoreDisplay = document.getElementById("score");
 
+// Items
 const itemEmojis = ["🧴","👒","🕶️","👕","💄"];
 let collectedCount = {"🧴":0,"👒":0,"🕶️":0,"👕":0,"💄":0};
 
-// --- INTRO ---
+// --- INTRO SLIDES ---
 const slides = [
   `Welcome to the Sun-safety Game!\nMela-no-no hopes to educate you\non the importance of protecting yourself\nfrom the sun's harmful UV rays.\n\nAre you ready?`,
   `👒 Hat: Protects your head and face\nfrom direct sun exposure.`,
@@ -46,6 +51,7 @@ const slides = [
 let currentSlide = 0;
 let introActive = true;
 
+// Draw intro slide
 function drawSlide(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.fillStyle="#87ceeb"; ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -56,6 +62,7 @@ function drawSlide(){
   ctx.fillText("Press any key or click to continue...",80,canvas.height-50);
 }
 
+// Advance slides
 function advanceSlide(){
   currentSlide++;
   if(currentSlide >= slides.length){ introActive=false; startGame();}
@@ -64,9 +71,11 @@ function advanceSlide(){
 
 document.addEventListener("keydown", ()=>{ if(introActive) advanceSlide(); });
 canvas.addEventListener("click", ()=>{ if(introActive) advanceSlide(); });
+
+// Draw first slide initially
 drawSlide();
 
-// --- GAME ---
+// --- GAME FUNCTIONS ---
 function startGame(){
   // Reset variables
   items=[]; score=0; timeLeft=60; gameOver=false;
@@ -77,7 +86,7 @@ function startGame(){
   function basketMove(e){
     if(e.key==="ArrowLeft") basket.x -= 20;
     if(e.key==="ArrowRight") basket.x += 20;
-    basket.x = Math.max(0, Math.min(canvas.width-basket.width, basket.x));
+    basket.x = Math.max(0, Math.min(canvas.width-basket.width,basket.x));
   }
 
   // Spawn items
@@ -99,6 +108,7 @@ function startGame(){
     }
   },1000);
 
+  // Update positions
   function update(){
     if(gameOver) return;
     items.forEach(item=>item.y += item.speed);
@@ -110,6 +120,7 @@ function startGame(){
     }
   }
 
+  // Draw game
   function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     if(!gameOver){
