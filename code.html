@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Catch the Falling Items</title>
+<style>
+  body {
+    margin: 0;
+    background: #f0f0f0;
+    text-align: center;
+    font-family: sans-serif;
+  }
+  canvas {
+    background: #87ceeb;
+    display: block;
+    margin: 20px auto;
+    border: 2px solid #333;
+  }
+  #info {
+    font-size: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div id="info">
+  <span id="score">Score: 0</span> | 
+  <span id="timer">Time: 30</span>
+</div>
+<canvas id="gameCanvas" width="400" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let basket = { x: canvas.width/2 - 30, y: canvas.height - 30, width: 60, height: 20 };
+let items = [];
+let score = 0;
+let timeLeft = 30; // seconds
+let gameOver = false;
+
+const timerDisplay = document.getElementById("timer");
+const scoreDisplay = document.getElementById("score");
+
+// speed factor: 20x faster countdown
+let countdownInterval = setInterval(() => {
+  timeLeft--;
+  timerDisplay.textContent = "Time: " + timeLeft;
+  if (timeLeft <= 0) {
+    gameOver = true;
+    clearInterval(countdownInterval);
+  }
+}, 1000 / 20); // 1 sec divided by 20 → 20x faster
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft") basket.x -= 20;
+  if (e.key === "ArrowRight") basket.x += 20;
+  basket.x = Math.max(0, Math.min(canvas.width - basket.width, basket.x));
+});
+
+function spawnItem() {
+  let size = 20;
+  items.push({
+    x: Math.random() * (canvas.width - size),
+    y: -size,
+    size: size,
+    speed: 2 + Math.random() * 2
+  });
+}
+
+function update() {
+  if (gameOver) return;
+
+  // Move items
+  items.forEach(item => {
+    item.y += item.speed;
+  });
+
+  // Check for catch
+  for (let i = items.length - 1; i >= 0; i--) {
+    let item = items[i];
+    if (
+      item.y + item.size >= basket.y &&
+      item.x + item.size >= basket.x &&
+      item.x <= basket.x + basket.width
+    ) {
+      score++;
+      scoreDisplay.textContent = "Score: " + score;
+      items.splice(i, 1);
+    } else if (item.y > canvas.height) {
+      items.splice(i, 1);
+    }
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw basket
+  ctx.fillStyle = "brown";
+  ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+
+  // Draw items
+  ctx.fillStyle = "red";
+  items.forEach(item => {
+    ctx.beginPath();
+    ctx.arc(item.x + item.size/2, item.y + item.size/2, item.size/2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  if (gameOver) {
+    ctx.fillStyle = "black";
+    ctx.font = "24px sans-serif";
+    ctx.fillText("Game Over! Final Score: " + score, 30, canvas.height/2);
+  }
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+// Spawn new items periodically
+setInterval(spawnItem, 800);
+
+gameLoop();
+</script>
+
+</body>
+</html>
