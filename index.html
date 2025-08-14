@@ -36,4 +36,100 @@ let collectedCount = {"🧴":0,"👒":0,"🕶️":0,"👕":0,"💄":0};
 
 // --- INTRO ---
 const slides = [
-  `Welcome to the Sun-safety
+  `Welcome to the Sun-safety Game!\nMela-no-no hopes to educate you\non the importance of protecting yourself\nfrom the sun's harmful UV rays.\n\nAre you ready?`,
+  `👒 Hat: Protects your head and face\nfrom direct sun exposure.`,
+  `💄 Lip balm: Keeps your lips safe\nfrom UV damage.`,
+  `👕 Long-sleeved shirt: Shields your arms\nand torso from harmful rays.`,
+  `🧴 Sunscreen: Apply to exposed skin\nfor extra protection.`,
+  `Recommended time outside without sunscreen:\n5-10 minutes!\nBut to make this fast-paced,\nyou only have 1 minute!\nLet's go!`
+];
+let currentSlide = 0;
+let introActive = true;
+
+function drawSlide(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#87ceeb"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="black"; ctx.font="22px sans-serif";
+  const lines = slides[currentSlide].split("\n");
+  for(let i=0;i<lines.length;i++){ ctx.fillText(lines[i],30,100 + i*40);}
+  ctx.font="18px sans-serif";
+  ctx.fillText("Press any key or click to continue...",80,canvas.height-50);
+}
+
+function advanceSlide(){
+  currentSlide++;
+  if(currentSlide >= slides.length){ introActive=false; startGame();}
+  else drawSlide();
+}
+
+document.addEventListener("keydown", ()=>{ if(introActive) advanceSlide(); });
+canvas.addEventListener("click", ()=>{ if(introActive) advanceSlide(); });
+drawSlide();
+
+// --- GAME ---
+function startGame(){
+  // Reset variables
+  items=[]; score=0; timeLeft=60; gameOver=false;
+  scoreDisplay.textContent = "Score: 0";
+
+  // Basket movement
+  document.addEventListener("keydown", basketMove);
+  function basketMove(e){
+    if(e.key==="ArrowLeft") basket.x -= 20;
+    if(e.key==="ArrowRight") basket.x += 20;
+    basket.x = Math.max(0, Math.min(canvas.width-basket.width, basket.x));
+  }
+
+  // Spawn items
+  let itemSpawnInterval = setInterval(()=>{ if(!gameOver) spawnItem(); }, 800);
+  function spawnItem(){
+    let size=30;
+    let emoji=itemEmojis[Math.floor(Math.random()*itemEmojis.length)];
+    items.push({x:Math.random()*(canvas.width-size),y:-size,size:size,speed:2+Math.random()*2,emoji:emoji});
+  }
+
+  // Timer
+  let countdownInterval = setInterval(()=>{
+    if(!gameOver){
+      timeLeft--;
+      let minutes=Math.floor(timeLeft/60);
+      let seconds=timeLeft%60;
+      timerDisplay.textContent=`Time: ${minutes}:${seconds.toString().padStart(2,'0')}`;
+      if(timeLeft<=0){ gameOver=true; clearInterval(countdownInterval); clearInterval(itemSpawnInterval);}
+    }
+  },1000);
+
+  function update(){
+    if(gameOver) return;
+    items.forEach(item=>item.y += item.speed);
+    for(let i=items.length-1;i>=0;i--){
+      let item=items[i];
+      if(item.y + item.size >= basket.y && item.x + item.size >= basket.x && item.x <= basket.x+basket.width){
+        score++; collectedCount[item.emoji]++; scoreDisplay.textContent="Score: "+score; items.splice(i,1);
+      } else if(item.y>canvas.height){ items.splice(i,1);}
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(!gameOver){
+      ctx.fillStyle="brown"; ctx.fillRect(basket.x,basket.y,basket.width,basket.height);
+      ctx.font="30px serif";
+      items.forEach(item=>ctx.fillText(item.emoji,item.x,item.y));
+    } else {
+      ctx.fillStyle="#87ceeb"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle="black"; ctx.font="30px sans-serif"; ctx.fillText("Game Over!",150,100);
+      ctx.font="24px sans-serif"; ctx.fillText("Final Score: "+score,150,150);
+      ctx.font="22px sans-serif";
+      let yPos=200;
+      for(let emoji of itemEmojis){ ctx.fillText(`${emoji}: ${collectedCount[emoji]}`,150,yPos); yPos+=40;}
+    }
+  }
+
+  function gameLoop(){ update(); draw(); requestAnimationFrame(gameLoop); }
+  gameLoop();
+}
+</script>
+
+</body>
+</html>
