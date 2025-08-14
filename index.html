@@ -75,7 +75,7 @@ canvas.addEventListener("click", ()=>{ if(introActive) advanceSlide(); });
 // Draw first slide initially
 drawSlide();
 
-// --- DRAW PLAYER ---
+// --- DRAW PLAYER (filled head, no sweat) ---
 function drawPlayer(){
     let x = player.x;
     let y = player.y;
@@ -88,10 +88,10 @@ function drawPlayer(){
     ctx.fillStyle = color;
     ctx.lineWidth = 3;
 
-    // Head (filled)
+    // Head (fully filled)
     ctx.beginPath();
     ctx.arc(x, y - 40, 15, 0, Math.PI*2);
-    ctx.fill();
+    ctx.fill();  // fill with red
     ctx.stroke();
 
     // Body
@@ -117,7 +117,6 @@ function drawPlayer(){
 
 // --- GAME FUNCTIONS ---
 function startGame(){
-  // Reset variables
   items=[]; score=0; timeLeft=60; gameOver=false;
   scoreDisplay.textContent = "Score: 0";
 
@@ -145,9 +144,4 @@ function startGame(){
       timerDisplay.textContent=`Time: ${minutes}:${seconds.toString().padStart(2,'0')}`;
       if(timeLeft<=0){ gameOver=true; clearInterval(countdownInterval); clearInterval(itemSpawnInterval);}
     }
-  },1000);
-
-  // Update items
-  function update(){
-    if(gameOver) return;
-    items.forEach(ite
+  },
