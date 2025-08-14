@@ -116,15 +116,39 @@ function update() {
 function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // Draw basket
-  ctx.fillStyle = "brown";
-  ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+  if (!gameOver) {
+    // Draw basket
+    ctx.fillStyle = "brown";
+    ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
 
-  // Draw falling items (emojis)
-  ctx.font = "30px serif";
-  items.forEach(item => {
-    ctx.fillText(item.emoji, item.x, item.y);
-  });
+    // Draw falling items (emojis only)
+    ctx.font = "30px serif";
+    items.forEach(item => {
+      ctx.fillText(item.emoji, item.x, item.y);
+    });
+  } else {
+    // Game over screen
+    ctx.fillStyle = "#87ceeb";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "black";
+    ctx.font = "30px sans-serif";
+    ctx.fillText("Game Over!", 110, 100);
+
+    ctx.font = "24px sans-serif";
+    ctx.fillText("Final Score: " + score, 120, 150);
+
+    ctx.font = "22px sans-serif";
+    let yPos = 200;
+    for (let emoji of itemEmojis) {
+      ctx.fillText(`${emoji}: ${collectedCount[emoji]}`, 150, yPos);
+      yPos += 40;
+    }
+
+    clearInterval(itemSpawnInterval); // stop spawning items
+  }
+}
+
 
   // Game Over display
   if (gameOver) {
