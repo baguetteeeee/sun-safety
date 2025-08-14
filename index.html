@@ -75,6 +75,53 @@ canvas.addEventListener("click", ()=>{ if(introActive) advanceSlide(); });
 // Draw first slide initially
 drawSlide();
 
+// --- STICK FIGURE ---
+function drawStickFigure(){
+    let x = canvas.width/2;
+    let y = canvas.height - 50;
+
+    // Redness based on elapsed time
+    let redness = Math.min(255, Math.floor(255 * (1 - timeLeft/60)));
+    let color = `rgb(${redness},100,100)`;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(x, y - 40, 15, 0, Math.PI*2);
+    ctx.stroke();
+
+    // Body
+    ctx.beginPath();
+    ctx.moveTo(x, y - 25);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    // Arms
+    ctx.beginPath();
+    ctx.moveTo(x - 15, y - 10);
+    ctx.lineTo(x + 15, y - 10);
+    ctx.stroke();
+
+    // Legs
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 15, y + 20);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 15, y + 20);
+    ctx.stroke();
+
+    // Sweat drops
+    let sweatCount = Math.floor((60 - timeLeft)/10);
+    ctx.fillStyle = "blue";
+    for(let i=0;i<sweatCount;i++){
+        ctx.beginPath();
+        ctx.arc(x - 20 + i*10, y - 45, 3, 0, Math.PI*2);
+        ctx.fill();
+    }
+}
+
 // --- GAME FUNCTIONS ---
 function startGame(){
   // Reset variables
@@ -124,10 +171,15 @@ function startGame(){
   function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     if(!gameOver){
+      // Basket
       ctx.fillStyle="brown"; ctx.fillRect(basket.x,basket.y,basket.width,basket.height);
+      // Items
       ctx.font="30px serif";
       items.forEach(item=>ctx.fillText(item.emoji,item.x,item.y));
+      // Stick figure
+      drawStickFigure();
     } else {
+      // Game Over screen
       ctx.fillStyle="#87ceeb"; ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.fillStyle="black"; ctx.font="30px sans-serif"; ctx.fillText("Game Over!",150,100);
       ctx.font="24px sans-serif"; ctx.fillText("Final Score: "+score,150,150);
