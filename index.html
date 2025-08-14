@@ -22,8 +22,8 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Basket
-let basket = { x: canvas.width/2 - 30, y: canvas.height - 30, width: 60, height: 20 };
+// Stick figure (player)
+let player = { x: canvas.width/2, y: canvas.height - 50, width: 30, height: 50 };
 
 // Game variables
 let items = [];
@@ -75,10 +75,10 @@ canvas.addEventListener("click", ()=>{ if(introActive) advanceSlide(); });
 // Draw first slide initially
 drawSlide();
 
-// --- STICK FIGURE ---
-function drawStickFigure(){
-    let x = canvas.width/2;
-    let y = canvas.height - 50;
+// --- DRAW STICK FIGURE ---
+function drawPlayer(){
+    let x = player.x;
+    let y = player.y;
 
     // Redness based on elapsed time
     let redness = Math.min(255, Math.floor(255 * (1 - timeLeft/60)));
@@ -128,13 +128,12 @@ function startGame(){
   items=[]; score=0; timeLeft=60; gameOver=false;
   scoreDisplay.textContent = "Score: 0";
 
-  // Basket movement
-  document.addEventListener("keydown", basketMove);
-  function basketMove(e){
-    if(e.key==="ArrowLeft") basket.x -= 20;
-    if(e.key==="ArrowRight") basket.x += 20;
-    basket.x = Math.max(0, Math.min(canvas.width-basket.width,basket.x));
-  }
+  // Player movement
+  document.addEventListener("keydown", function(e){
+      if(e.key==="ArrowLeft") player.x -= 20;
+      if(e.key==="ArrowRight") player.x += 20;
+      player.x = Math.max(15, Math.min(canvas.width-15, player.x));
+  });
 
   // Spawn items
   let itemSpawnInterval = setInterval(()=>{ if(!gameOver) spawnItem(); }, 800);
@@ -155,29 +154,28 @@ function startGame(){
     }
   },1000);
 
-  // Update positions
+  // Update items
   function update(){
     if(gameOver) return;
     items.forEach(item=>item.y += item.speed);
     for(let i=items.length-1;i>=0;i--){
       let item=items[i];
-      if(item.y + item.size >= basket.y && item.x + item.size >= basket.x && item.x <= basket.x+basket.width){
+      // Check collision with stick figure's head and torso
+      if(item.y + item.size >= player.y - 40 && item.x + item.size >= player.x - 15 && item.x <= player.x + 15){
         score++; collectedCount[item.emoji]++; scoreDisplay.textContent="Score: "+score; items.splice(i,1);
       } else if(item.y>canvas.height){ items.splice(i,1);}
     }
   }
 
-  // Draw game
+  // Draw everything
   function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     if(!gameOver){
-      // Basket
-      ctx.fillStyle="brown"; ctx.fillRect(basket.x,basket.y,basket.width,basket.height);
       // Items
       ctx.font="30px serif";
       items.forEach(item=>ctx.fillText(item.emoji,item.x,item.y));
-      // Stick figure
-      drawStickFigure();
+      // Player
+      drawPlayer();
     } else {
       // Game Over screen
       ctx.fillStyle="#87ceeb"; ctx.fillRect(0,0,canvas.width,canvas.height);
